@@ -1,0 +1,151 @@
+*jsonize.txt*       Pretty-print and structure almost-JSON (no jq, no value changes)
+
+==============================================================================
+INTRODUCTION                                              *jsonize* *jsonize.vim*
+
+Jsonize pretty-prints and **structures** almost-JSON so it *looks* like JSON —
+**without jq**, and **without changing values**.
+
+This plugin was born from the need to quickly inspect debug output that isn’t
+valid JSON. Single-line, unquoted, or partially structured data that |jq|
+can’t parse — while keeping the original values visible.
+
+It quotes keys and single-quoted strings, fixes commas, newlines, and
+indentation, and removes trailing commas — but it **does not normalize values**
+like `NaN`, `Infinity`, `undefined`, or placeholders such as `[Object]` /
+`[Array]`. Those are preserved verbatim.
+
+==============================================================================
+WHAT IT DOES (STRUCTURE-ONLY)                            *jsonize-structure*
+
+- Quotes unquoted object keys → `"key": value`
+- Converts `'single-quoted strings'` → `"double-quoted strings"`
+- Adds consistent newlines and indentation
+- Removes trailing commas before `]` or `}`
+- Tidies up extra spaces and line breaks
+
+What it **does not** do:
+  • No parsing or validation (output may not be valid JSON)
+  • No value normalization (keeps `NaN`, `Infinity`, `undefined`, `[Object]`, etc.)
+  • No type coercion or schema checking
+
+==============================================================================
+REQUIREMENTS                                             *jsonize-requirements*
+
+- Vim 8.0+ or Neovim
+- No external tools required
+
+==============================================================================
+INSTALLATION                                             *jsonize-installation*
+
+vim-plug:
+>
+    Plug 'leonskim/jsonize.vim'
+<
+
+Vundle:
+>
+    Plugin 'leonskim/jsonize.vim'
+<
+
+packer.nvim:
+>
+    use 'leonskim/jsonize.vim'
+<
+
+Restart Vim/Neovim and run:
+>
+    :helptags ALL
+<
+
+==============================================================================
+KEY MAPPINGS                                             *jsonize-mappings*
+
+Visual mode:
+    <leader>jf    formats the selected text
+
+Normal mode:
+    <leader>jf    runs :Jsonize (defaults to the whole buffer)
+
+==============================================================================
+COMMANDS                                                 *jsonize-commands*
+
+:Jsonize
+    Format the entire buffer.
+
+:[range]Jsonize
+    Format only the given line range.
+
+Examples:
+>
+    :Jsonize
+    :42Jsonize
+    :3,15Jsonize
+    :'<,'>Jsonize
+    :%Jsonize
+<
+
+==============================================================================
+EXAMPLES                                                 *jsonize-examples*
+
+Input:
+>
+    { user: 'alice', plan: Pro, lastLogin: NaN, meta: [Object] }
+<
+
+Output:
+>
+    {
+      "user": "alice",
+      "plan": Pro,
+      "lastLogin": NaN,
+      "meta": [Object]
+    }
+<
+
+Input:
+>
+    [
+      {id:1, name:'A', extra:[Array], price:Infinity},
+      {id:2, name:'B', extra:[Object], price:undefined},
+    ]
+<
+
+Output:
+>
+    [
+      {
+        "id": 1,
+        "name": "A",
+        "extra": [Array],
+        "price": Infinity
+      },
+      {
+        "id": 2,
+        "name": "B",
+        "extra": [Object],
+        "price": undefined
+      }
+    ]
+<
+
+Note:
+    Trailing commas are removed, keys and strings are quoted,
+    and indentation is normalized.
+    Values like Infinity, NaN, undefined, [Object], [Array] are left as-is.
+
+==============================================================================
+CAVEATS                                                 *jsonize-caveats*
+
+- The result looks like JSON but may not be valid JSON because special tokens
+  are preserved.
+- If you need strict JSON, use a real serializer after inspection
+  (e.g. convert NaN/Infinity/undefined to null).
+
+==============================================================================
+LICENSE                                                 *jsonize-license*
+
+MIT License — © Leon Kim (https://github.com/leonskim)
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
